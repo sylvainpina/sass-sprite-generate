@@ -1,0 +1,71 @@
+
+@mixin sprite-generate($name, $multiply : false, $extend : false, $states : $sprite-selectors, $path : "sprites") {
+  $suffix : "";
+  $spacing : 1px;
+  @if $multiply {
+    $suffix : "-#{$multiply}x";
+    $spacing : $spacing * $multiply;
+  }
+  $base-class : #{$name}#{$suffix}#{$default-sprite-separator}sprite;
+  $map : sprite-map("#{$path}/#{$name}#{$suffix}/*.png");
+  $names : sprite-names($map);
+  .#{$base-class} {
+    background-image : $map;
+    @if $multiply == false {
+      background-size : sprite-width($map) sprite-height($map);
+    }
+    @extend .#{$base-class};
+    @if $extend {
+      @extend .#{$extend};
+    }
+  }
+
+  @each $sprite-name in $names {
+    $hasSelectorInName : false;
+    @each $state in $states {
+      @if str-index($sprite-name, $state) {
+        $hasSelectorInName : true;
+      }
+    }
+    @if $hasSelectorInName == false {
+      .#{$name}#{$default-sprite-separator}#{$sprite-name} {
+        @extend .#{$base-class};
+        @if $multiply == false {
+          @include sprite-dimensions($map, $sprite-name);
+          @include sprite-background-position($map, $sprite-name);
+          @each $state in $states {
+            $sprite-class : "#{$sprite-name}#{$default-sprite-separator}#{$state}";
+            @if sprite_has_selector($map, $sprite-name, $state) {
+              @if sprite_has_valid_selector($sprite-class) {
+                &:#{$state},
+                &.#{$state} {
+                  @include sprite-background-position($map, $sprite-class);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.buttons-sprite {
+  overflow        : hidden;
+  display         : inline-block;
+  vertical-align  : middle;
+  padding         : 0;
+  border          : 0 none;
+  text-decoration : none;
+  text-indent     : -5000px;
+  &:active,
+  &:focus {
+    outline : 0 none;
+  }
+}
+
+@include sprite-generate('buttons');
+
+@media (-webkit-min-device-pixel-ratio : 2), (min-device-pixel-ratio : 2) {
+  @include sprite-generate('buttons', 2);
+}
