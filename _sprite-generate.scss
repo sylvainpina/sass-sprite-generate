@@ -23,7 +23,7 @@
   @each $sprite-name in $names {
     $hasSelectorInName : false;
     @each $state in $states {
-      @if str-index($sprite-name, $state) {
+      @if str-index($sprite-name, "#{$default-sprite-separator}#{$state}") {
         $hasSelectorInName : true;
       }
     }
